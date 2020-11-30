@@ -34,7 +34,8 @@
               "depends": [
                 "vlc",
                 "ffmpeg"
-              ]
+              ],
+              "icon": "icons/audioshare.png"
             }
           }
         }
