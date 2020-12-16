@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
+const spawnWIN = require('cross-spawn');
 const { stderr, kill } = require("process");
 const open = require("open");
 const isDev = require("electron-is-dev");
@@ -19,7 +20,7 @@ if (isDev) {
   cache_dir = path.join(app.getPath("cache"), app.getName());
 }
 console.log("cache dir is", cache_dir);
-spawn("mkdir", ["-p", cache_dir]);
+spawn("mkdir", ["-p", cache_dir], {detached:true,shell: process.platform == 'win32'});
 
 let pyCliStat = {
   process: null,
@@ -95,7 +96,7 @@ const runCLI = async (arg) => {
   const commandArgs = [];
   arg.files.forEach((file) => {
     commandArgs.push("-f");
-    commandArgs.push(`'${file}'`);
+    commandArgs.push(`"${file}"`);
   });
   if (arg.onlyHost) {
     commandArgs.push("--only-host");
@@ -104,10 +105,10 @@ const runCLI = async (arg) => {
   if (arg.qr) {
     commandArgs.push("--qr");
   }
-  console.log(commandArgs);
-  const command = `${binary_dir.toString()}/LocalParty`;
+  const command = `${binary_dir.toString()}/LocalParty${process.platform == 'win32'?'.exe':''}`;
+  console.log(command);
   
-  const pyCli = spawn(command, commandArgs, {
+  const pyCli = spawnWIN(command, commandArgs, {
     cwd: cache_dir,
     shell: true,
     detached: true,

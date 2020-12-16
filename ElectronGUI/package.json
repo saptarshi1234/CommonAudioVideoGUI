@@ -38,12 +38,19 @@
               "icon": "icons/audioshare.png"
             }
           }
+        },
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "description": "An audiosharing application"
+          }
         }
       ]
     }
   },
   "dependencies": {
     "bootstrap": "^4.5.3",
+    "cross-spawn": "^7.0.3",
     "electron": "^10.1.5",
     "electron-is-dev": "^1.2.0",
     "electron-squirrel-startup": "^1.0.0",
