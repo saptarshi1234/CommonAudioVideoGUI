@@ -7,7 +7,7 @@ const spawnWIN = require('cross-spawn');
 const { stderr, kill } = require("process");
 const open = require("open");
 const isDev = require("electron-is-dev");
-// const kill = require("tree-kill");
+const treekill = require("tree-kill");
 
 const binary_dir = path.join(__dirname, "../binaries");
 
@@ -20,7 +20,7 @@ if (isDev) {
   cache_dir = path.join(app.getPath("cache"), app.getName());
 }
 console.log("cache dir is", cache_dir);
-spawn("mkdir", ["-p", cache_dir], {detached:true,shell: process.platform == 'win32'});
+spawn("mkdir", [cache_dir], {detached:true,shell: process.platform == 'win32'});
 
 let pyCliStat = {
   process: null,
@@ -53,7 +53,8 @@ const createWindow = () => {
   mainWindow.loadFile(path.join(__dirname, "index.html"));
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  if(isDev)
+    mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
@@ -67,7 +68,10 @@ app.on("ready", createWindow);
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     if (pyCliStat.process) {
-      kill(-pyCliStat.process.pid);
+      if(process.platform == 'win32')
+        treekill(pyCliStat.process.pid);
+      else
+        kill(pyCliStat.process.pid);
     }
     app.quit();
   }
@@ -111,7 +115,7 @@ const runCLI = async (arg) => {
   const pyCli = spawnWIN(command, commandArgs, {
     cwd: cache_dir,
     shell: true,
-    detached: true,
+    detached: false,
   });
   
   pyCliStat.process = pyCli;
@@ -171,7 +175,11 @@ ipcMain.on("show_qr", (event) => {
 ipcMain.on("killCLI", (event, arg) => {
   if (!pyCliStat.process) return;
 
-  kill(-pyCliStat.process.pid);
+  if(process.platform == 'win32')
+    treekill(pyCliStat.process.pid);
+  else
+    kill(pyCliStat.process.pid);
+
   console.log("CLI killed");
 
   pyCliStat = {
