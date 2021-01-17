@@ -20,7 +20,7 @@ if (isDev) {
   cache_dir = path.join(app.getPath("cache"), app.getName());
 }
 console.log("cache dir is", cache_dir);
-spawn("mkdir", [cache_dir], {detached:true,shell: process.platform == 'win32'});
+spawn("mkdir", [`"${cache_dir}"`], {detached:true,shell: process.platform == 'win32'});
 
 let pyCliStat = {
   process: null,
@@ -109,7 +109,7 @@ const runCLI = async (arg) => {
   if (arg.qr) {
     commandArgs.push("--qr");
   }
-  const command = `${binary_dir.toString()}/LocalParty${process.platform == 'win32'?'.exe':''}`;
+  const command = `"${binary_dir.toString()}/LocalParty${process.platform == 'win32'?'.exe':''}"`;
   console.log(command);
   
   const pyCli = spawnWIN(command, commandArgs, {
